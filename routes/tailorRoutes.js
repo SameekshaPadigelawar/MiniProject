@@ -156,36 +156,164 @@ router.get("/requests/tailor/:tailorId", async (req, res) => {
 
 
 // ✅ Tailor updates status of request (accept or reject)
+// router.put("/requests/:id/status", async (req, res) => {
+//   try {
+//     const { status } = req.body;
+
+//     if (!["accepted", "rejected"].includes(status)) {
+//       return res.status(400).json({ msg: "Invalid status value" });
+//     }
+
+//     const updated = await Request.findByIdAndUpdate(
+//       req.params.id,
+//       { status },
+//       { new: true }
+//     );
+
+//     if (!updated) return res.status(404).json({ msg: "Request not found" });
+
+//     res.json({ msg: "Status updated", request: updated });
+//   } catch (error) {
+//     res.status(500).json({ msg: "Server Error" });
+//   }
+// });
+
+
+
+
+
+
+
+
 router.put("/requests/:id/status", async (req, res) => {
   try {
-    const { status } = req.body;
+    const { status, cost } = req.body;
 
     if (!["accepted", "rejected"].includes(status)) {
-      return res.status(400).json({ msg: "Invalid status value" });
+      return res.status(400).json({ msg: "Invalid status value." });
+    }
+
+    let updateFields = { status };
+
+    // Only add cost if status is accepted
+    if (status === "accepted") {
+      if (cost === undefined || isNaN(Number(cost))) {
+        return res.status(400).json({ msg: "Cost is required when accepting a request." });
+      }
+      updateFields.cost = Number(cost);
     }
 
     const updated = await Request.findByIdAndUpdate(
       req.params.id,
-      { status },
+      updateFields,
       { new: true }
     );
 
-    if (!updated) return res.status(404).json({ msg: "Request not found" });
+    if (!updated) {
+      return res.status(404).json({ msg: "Request not found" });
+    }
 
-    res.json({ msg: "Status updated", request: updated });
+    res.json({ msg: "Status updated successfully", request: updated });
+
   } catch (error) {
-    res.status(500).json({ msg: "Server Error" });
+    console.error(error);
+    res.status(500).json({ msg: "Server error" });
   }
 });
+
+
+
+
+
+
+ 
+
+// router.put("/requests/:id/status", async (req, res) => {
+//   try {
+//     // Destructuring status and cost directly from the request body
+//     // const { status, cost } = req.body;
+//     const status = req.body.status?.trim().toLowerCase();
+//     const cost = req.body.cost?.toString().trim();
+
+
+//     // Validate status (only "accepted" or "rejected" are allowed)
+//     if (!["accepted", "rejected"].includes(status)) {
+//       return res.status(400).json({ msg: "Invalid status value. Allowed values are 'accepted' or 'rejected'." });
+//     }
+
+//     // If the status is "accepted", ensure cost is provided and is a valid number
+//     let validatedCost = null;
+//     if (status === "accepted") {
+//       if (cost === undefined || Number.isNaN(Number(cost))) {
+//         return res.status(400).json({ msg: "Cost is required and must be a valid number when accepting the request." });
+//       }
+//       validatedCost = Number(cost);
+//     }
+
+//     // Update the request in the database
+//     const updated = await Request.findByIdAndUpdate(
+//       req.params.id, // Get request by ID from the URL
+//       { status, cost: validatedCost }, // Update status and cost (if valid)
+//       { new: true } // Return the updated document
+//     );
+
+//     // Handle case where request is not found
+//     if (!updated) {
+//       return res.status(404).json({ msg: "Request not found" });
+//     }
+
+//     // Return success response
+//     res.json({ msg: "Status updated successfully", updatedCost: validatedCost, request: updated });
+//     // res.json({ msg: "Status updated successfully", request: updated });
+
+//   } catch (error) {
+//     console.error(error);
+//     // Return a 500 error if there's a server issue
+//     res.status(500).json({ msg: "Server error, please try again later." });
+//   }
+// });
+
+
+
+
+
+
+ 
+
+
+
 
 // ✅ Customer gets all their requests with status
 router.get("/requests/customer/:customerId", async (req, res) => {
   try {
     const requests = await Request.find({ customer: req.params.customerId }).populate("tailor", "fullName");
+    console.log(requests); 
     res.json(requests);
   } catch (error) {
     res.status(500).json({ msg: "Server Error" });
   }
 });
+
+// router.get('/requests/customer/:customerId', async (req, res) => {
+//   const { customerId } = req.params; // Get customerId from URL params
+//   console.log("Fetching requests for customer ID:", customerId);
+//   try {
+//     // Find requests where the customer field matches the logged-in customerId
+//     const customerRequests = await Request.find({ customer: customerId })
+//       .populate('tailor')  // optional: populate tailor details if needed
+//       .populate('customer'); // optional: populate customer details if needed
+
+//     if (customerRequests.length === 0) {
+//       return res.status(404).json({ message: "No requests found for this customer" });
+//     }
+
+//     res.status(200).json(customerRequests);
+//   } catch (err) {
+//     console.error('Error fetching customer requests:', err);
+//     res.status(500).json({ message: 'Server error fetching requests' });
+//   }
+// });
+
+
 
 module.exports = router;

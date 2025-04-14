@@ -110,18 +110,18 @@ router.post("/register", upload.single("profilePicture"), async (req, res) => {
 
 
 
-  const token = crypto.randomBytes(32).toString("hex");
+  // const token = crypto.randomBytes(32).toString("hex");
 
-  user = new User({ 
-    fullName, email, password: hashedPassword, 
-    phone, role, locality, skills, availability, 
-    profilePicture,
-    verificationToken: token ,
-    expiresAt: Date.now() + 24 * 60 * 60 * 1000 // expires in 1 day
-  });
+  // user = new User({ 
+  //   fullName, email, password: hashedPassword, 
+  //   phone, role, locality, skills, availability, 
+  //   profilePicture,
+  //   verificationToken: token ,
+  //   expiresAt: Date.now() + 24 * 60 * 60 * 1000 // expires in 1 day
+  // });
   
-  await user.save();
-  await sendVerificationEmail(email, token);
+  // await user.save();
+  // await sendVerificationEmail(email, token);
 
 
   
