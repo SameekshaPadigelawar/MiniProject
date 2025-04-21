@@ -25,8 +25,8 @@ const requestSchema = new mongoose.Schema({
   details: { type: String, required: true },
   time: { type: Number, required: true },
   location: { type: String, required: true },
-  status: { type: String, enum: ["pending", "accepted", "rejected"], default: "pending" },
-  cost: {type: Number,default: null},
+  status: { type: String, enum: ["pending", "accepted", "rejected", "cancelled"], default: "pending" },
+  cost: {type: Number, default: null},
 }, 
 { timestamps: true }); 
 module.exports = mongoose.model("Request", requestSchema);

@@ -28,18 +28,12 @@ const requestRoutes = require("./routes/requestRoutes");
 const reviewRoutes = require("./routes/reviewRoutes");
 const orderRoutes = require("./routes/orderRoutes");
 const visitorRoutes = require("./routes/visitorRoutes");
-
 const userRoutes = require("./routes/userRoutes");
- 
-
 require("dotenv").config();
-
 const app = express();
-
 // Middleware
 app.use(express.json());
 app.use(cors());
-
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/tailors", tailorRoutes); // Added this

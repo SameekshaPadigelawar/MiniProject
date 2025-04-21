@@ -1,97 +1,8 @@
-// const express = require("express");
-// const User = require("../models/User");
-// const Request = require("../models/Request");
-// const router = express.Router();
-
-// // Get all tailors
-// router.get("/tailors", async (req, res) => {
-//   try {
-//     const tailors = await User.find({ role: "tailor" }).select("-password"); // Exclude password
-//     res.json(tailors);
-//   } catch (error) {
-//     res.status(500).json({ msg: "Server Error" });
-//   }
-// });
-
- 
-
-
-// router.post("/requests", async (req, res) => {
-//     try {
-//       const { customer, tailor, message } = req.body;
-  
-//       if (!customer || !tailor || !message) {
-//         return res.status(400).json({ msg: "All fields are required" });
-//       }
-  
-//       const newRequest = new Request({
-//         customer,
-//         tailor,
-//         message,
-//       });
-  
-//       await newRequest.save();
-//       res.status(201).json({ msg: "Request sent successfully" });
-//     } catch (error) {
-//       console.error(error);
-//       res.status(500).json({ msg: "Server Error" });
-//     }
-//   });
-
-
-
-// // Add a request from the customer
-// // router.post("/request", async (req, res) => {
-// //     try {
-// //       const { customerId, tailorId, message } = req.body;
-  
-// //       if (!customerId || !tailorId || !message) {
-// //         return res.status(400).json({ msg: "Please provide all required fields" });
-// //       }
-  
-// //       const request = new Request({
-// //         customerId,
-// //         tailorId,
-// //         message,
-// //       });
-  
-// //       await request.save();
-// //       res.status(201).json({ msg: "Request sent successfully" });
-// //     } catch (error) {
-// //       console.error(error);
-// //       res.status(500).json({ msg: "Server Error" });
-// //     }
-// //   });
-  
-
-// // Tailor views assigned requests
-// router.get("/requests/tailor/:tailorId", async (req, res) => {
-//   try {
-//     const { tailorId } = req.params;
-//     const requests = await Request.find({ tailor: tailorId }).populate("customer", "fullName email");
-    
-//     res.json(requests);
-//   } catch (error) {
-//     res.status(500).json({ msg: "Server Error" });
-//   }
-// });
-
-// module.exports = router;
-
-
-
-
-
-
-
-
-
-
-
-
 const express = require("express");
 const User = require("../models/User");
 const Request = require("../models/Request");
+// const Notification = require("../models/Notification"); // Create this model
+// const  { authenticateToken }   = require('../middleware/authMiddleware'); // adjust the path if needed
 const router = express.Router();
 
 // ✅ Get all tailors
@@ -315,5 +226,32 @@ router.get("/requests/customer/:customerId", async (req, res) => {
 // });
 
 
+ 
+// Cancel request without any auth check
+router.put("/requests/cancel/:id", async (req, res) => {
+  try {
+    const request = await Request.findById(req.params.id).populate("tailor");
+
+    if (!request) {
+      return res.status(404).json({ msg: "Request not found" });
+    }
+
+    request.status = "cancelled";
+    await request.save();
+
+    // Send message to tailor
+    if (request.tailor) {
+      console.log(
+        `Notification to Tailor ${request.tailor.fullName}: Customer has cancelled the order.`
+      );
+      // Optional: Save notification to DB or send email
+    }
+
+    res.status(200).json({ msg: "Request cancelled and tailor notified." });
+  } catch (err) {
+    console.error("Error cancelling request:", err);
+    res.status(500).json({ msg: "Server error" });
+  }
+});
 
 module.exports = router;
